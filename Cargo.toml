@@ -1,0 +1,13 @@
+[package]
+name = "memex"
+version = "0.1.1"
+authors = ["Matthias Seitz <matthias.seitz@outlook.de>"]
+edition = "2018"
+description = "Execute memes"
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+homepage = "https://github.com/mattsse/memes"
+repository = "https://github.com/mattsse/memes"
+keywords = ["meme"]
+
+[dependencies]
