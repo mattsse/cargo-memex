@@ -10,14 +10,13 @@ homepage = "https://github.com/mattsse/memex"
 repository = "https://github.com/mattsse/memex"
 keywords = ["meme"]
 
-#[[bin]]
-#name = "cargo-memex"
-#path = "src/main.rs"
-
 [dependencies]
-cargo_metadata = "0.13.1"
 structopt = "0.3.21"
 image = { version = "0.23.14", features = ["jpeg"] }
-tempfile = "3.2.0"
 num-traits = "0.2.0"
 num-iter = "0.1.32"
+anyhow = "1.0.40"
+toml = "0.5.8"
+log = "0.4.14"
+pretty_env_logger = "0.4.0"
+reqwest = { version =  "0.11.3", features = ["blocking"] }
