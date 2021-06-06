@@ -10,3 +10,4 @@ Licensed under either of these:
   https://www.apache.org/licenses/LICENSE-2.0)
 * MIT license ([LICENSE-MIT](LICENSE-MIT) or
   https://opensource.org/licenses/MIT)
+* The Jpeg encoder/decoder are adapter from [image-rs/image](https://github.com/image-rs/image) whiche are license under [MIT](https://github.com/image-rs/image/blob/master/LICENSE)
