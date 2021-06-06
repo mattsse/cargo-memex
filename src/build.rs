@@ -16,7 +16,7 @@ pub struct BuildCommand {
     manifest_path: Option<PathBuf>,
 
     /// The targeted meme
-    meme: String,
+    meme: Option<String>,
 
     /// Build the specified binary
     #[structopt(long)]
@@ -34,7 +34,11 @@ pub struct BuildCommand {
 impl BuildCommand {
     /// execute the build command
     pub fn run(&self) -> anyhow::Result<BuildOutput> {
-        let meme = Meme::new(&self.meme)?;
+        let meme = self
+            .meme
+            .clone()
+            .unwrap_or_else(|| if self.release { "release" } else { "debug" }.to_string());
+        let meme = Meme::new(&meme)?;
         let cargo = std::env::var("CARGO").unwrap_or_else(|_| "cargo".to_string());
         let mut cmd = Command::new(cargo);
         cmd.arg("build");

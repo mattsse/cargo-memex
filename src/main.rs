@@ -1,6 +1,6 @@
-use memex::build::BuildCommand;
-use memex::exec::ExecCommand;
-use memex::run::RunCommand;
+use cargo_memex::build::BuildCommand;
+use cargo_memex::exec::ExecCommand;
+use cargo_memex::run::RunCommand;
 use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]

@@ -14,6 +14,10 @@ pub static BORROW_CHECKER: &[u8] = include_bytes!("../resources/borrow-checker.j
 
 pub static RUST_EXPERT: &[u8] = include_bytes!("../resources/rust-expert.jpg");
 
+pub static DEBUG: &[u8] = include_bytes!("../resources/debug.jpg");
+
+pub static RELEASE: &[u8] = include_bytes!("../resources/release.jpg");
+
 #[derive(Debug, Clone)]
 pub struct Meme {
     pub content: Vec<u8>,
@@ -27,6 +31,8 @@ impl Meme {
             reqwest::blocking::get(url)?.bytes()?.to_vec()
         } else {
             match s.to_lowercase().replace("-", "").as_str() {
+                "debug" => DEBUG.to_vec(),
+                "release" => RELEASE.to_vec(),
                 "trader" => TRADE_OFFER.to_vec(),
                 "expert" | "rustexpert" => RUST_EXPERT.to_vec(),
                 "borrowchecker" => BORROW_CHECKER.to_vec(),
