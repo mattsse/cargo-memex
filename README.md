@@ -18,7 +18,7 @@ With `cargo-memex` they can look like this:
 
 Another limitation of rust binaries is, that `debug` and `release` executables are visually indistinguishable.
 
-`cargo-memex` fixes this problem by displaying the two different target destinations by default with the corresponding segment of:
+`cargo-memex` fixes this problem by displaying the two different targets by default with the corresponding segment of:
 
 ![](./resources/hank.jpg)
 
