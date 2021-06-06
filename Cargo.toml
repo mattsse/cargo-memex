@@ -9,6 +9,7 @@ readme = "README.md"
 homepage = "https://github.com/mattsse/cargo-memex"
 repository = "https://github.com/mattsse/cargo-memex"
 keywords = ["meme"]
+include = ["Cargo.toml", "src/**/*.rs", "README.md", "LICENSE*", "resources"]
 
 [dependencies]
 structopt = "0.3.21"

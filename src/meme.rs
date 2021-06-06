@@ -33,7 +33,7 @@ impl Meme {
             match s.to_lowercase().replace("-", "").as_str() {
                 "debug" => DEBUG.to_vec(),
                 "release" => RELEASE.to_vec(),
-                "trader" => TRADE_OFFER.to_vec(),
+                "trader" | "tradeoffer" => TRADE_OFFER.to_vec(),
                 "expert" | "rustexpert" => RUST_EXPERT.to_vec(),
                 "borrowchecker" => BORROW_CHECKER.to_vec(),
                 _ => {
