@@ -46,16 +46,21 @@ impl Default for AppMarkerConfig {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::jpeg::decoder::AppMarkerJpegDecoder;
-    use crate::jpeg::encoder::AppMarkerJpegEncoder;
-    use crate::meme::TRADE_OFFER;
-    use image::codecs::jpeg::{JpegDecoder, JpegEncoder};
-    use image::{ColorType, DynamicImage, ImageDecoder};
-    use std::fs::{File, OpenOptions};
-    use std::io::{BufReader, BufWriter, Cursor, Read};
-    use std::os::unix::prelude::OpenOptionsExt;
+    use crate::{
+        jpeg::decoder::AppMarkerJpegDecoder, jpeg::encoder::AppMarkerJpegEncoder, meme::TRADE_OFFER,
+    };
+    use image::{
+        codecs::jpeg::{JpegDecoder, JpegEncoder},
+        ColorType, DynamicImage, ImageDecoder,
+    };
+    use std::{
+        fs::{File, OpenOptions},
+        io::{BufReader, BufWriter, Cursor, Read},
+        os::unix::prelude::OpenOptionsExt,
+    };
 
     #[test]
+    #[ignore]
     fn decode_encode() {
         let cursor = Cursor::new(TRADE_OFFER);
         let decoder = JpegDecoder::new(cursor).unwrap();
@@ -74,6 +79,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn demo_jpeg() {
         let f = OpenOptions::new()
             .write(true)
@@ -86,6 +92,6 @@ mod tests {
         let input = BufReader::new(File::open("./resources/encoded.jpeg").unwrap());
         let decoder = AppMarkerJpegDecoder::new(input, output, AppMarkerConfig::default()).unwrap();
         decoder.dimensions();
-        let img = DynamicImage::from_decoder(decoder).unwrap();
+        // let img = DynamicImage::from_decoder(decoder).unwrap();
     }
 }

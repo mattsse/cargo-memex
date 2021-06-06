@@ -1,31 +1,31 @@
 use memex::build::BuildCommand;
+use memex::exec::ExecCommand;
 use memex::run::RunCommand;
-use structopt::{clap, StructOpt};
+use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]
 #[structopt(bin_name = "cargo")]
-pub(crate) enum Opts {
-    /// Utilities to compile memes.
-    #[structopt(name = "memex")]
-    Memex(MemexArgs),
-}
-
-#[derive(Debug, StructOpt)]
-pub(crate) struct MemexArgs {
-    #[structopt(subcommand)]
-    cmd: Command,
-}
-
-#[derive(Debug, StructOpt)]
-enum Command {
+enum Opts {
     /// Compiles the project into a meme
     #[structopt(name = "build")]
     Build(BuildCommand),
-    /// Executes a meme
+    /// Builds and runs a meme
     #[structopt(name = "run")]
     Run(RunCommand),
+    /// Executes a meme
+    #[structopt(name = "exec")]
+    Exec(ExecCommand),
 }
 
-fn main() {
-    let Opts::Memex(args) = Opts::from_args();
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    pretty_env_logger::init();
+    let cmd = Opts::from_args();
+    match cmd {
+        Opts::Build(cmd) => {
+            cmd.run()?;
+        }
+        Opts::Run(cmd) => cmd.run()?,
+        Opts::Exec(cmd) => cmd.run()?,
+    }
+    Ok(())
 }

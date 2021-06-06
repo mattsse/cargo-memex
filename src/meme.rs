@@ -1,5 +1,12 @@
-use std::borrow::Cow;
-use std::str::FromStr;
+use crate::jpeg::decoder::AppMarkerJpegDecoder;
+use crate::jpeg::encoder::AppMarkerJpegEncoder;
+use crate::jpeg::AppMarkerConfig;
+use image::codecs::jpeg::JpegDecoder;
+use image::{DynamicImage, ImageDecoder};
+use std::fs::{File, OpenOptions};
+use std::io::{BufReader, BufWriter, Cursor};
+use std::os::unix::prelude::OpenOptionsExt;
+use std::path::{Path, PathBuf};
 
 pub static TRADE_OFFER: &[u8] = include_bytes!("../resources/trade-offer.jpg");
 
@@ -8,117 +15,77 @@ pub static BORROW_CHECKER: &[u8] = include_bytes!("../resources/borrow-checker.j
 pub static RUST_EXPERT: &[u8] = include_bytes!("../resources/rust-expert.jpg");
 
 #[derive(Debug, Clone)]
-pub struct MemeFile {
-    pub name: String,
-    pub content: Cow<'static, [u8]>,
+pub struct Meme {
+    pub content: Vec<u8>,
 }
 
-impl FromStr for MemeFile {
-    type Err = String;
+impl Meme {
+    pub fn new(s: impl AsRef<str>) -> anyhow::Result<Self> {
+        let s = s.as_ref();
+        let content = if let Ok(url) = reqwest::Url::parse(s) {
+            log::debug!("Requesting meme from {:?}", url);
+            reqwest::blocking::get(url)?.bytes()?.to_vec()
+        } else {
+            match s.to_lowercase().replace("-", "").as_str() {
+                "trader" => TRADE_OFFER.to_vec(),
+                "expert" | "rustexpert" => RUST_EXPERT.to_vec(),
+                "borrowchecker" => BORROW_CHECKER.to_vec(),
+                _ => {
+                    log::debug!("Reading meme file {}", s);
+                    std::fs::read(s)?
+                }
+            }
+        };
+        Ok(Self { content })
+    }
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        todo!()
+    /// Puts the bin file into the meme and write to dest
+    pub fn write_with_bin_to(
+        &self,
+        bin: impl AsRef<Path>,
+        dest: impl AsRef<Path>,
+    ) -> anyhow::Result<PathBuf> {
+        let cursor = Cursor::new(&self.content);
+        let decoder = JpegDecoder::new(cursor)?;
+        let color_type = decoder.color_type();
+        let (width, height) = decoder.dimensions();
+        let img = DynamicImage::from_decoder(decoder)?;
+
+        log::debug!("Reading cargo binary from `{}`", bin.as_ref().display());
+        let bin = BufReader::new(File::open(bin)?);
+
+        let dest = dest.as_ref();
+        log::debug!("Creating meme exe at `{}`", dest.display());
+        let mut out = BufWriter::new(File::create(dest)?);
+
+        let mut encoder =
+            AppMarkerJpegEncoder::new_with_quality(&mut out, bin, AppMarkerConfig::default(), 100);
+
+        encoder.encode(img.as_bytes(), width, height, color_type)?;
+
+        Ok(dest.to_path_buf())
+    }
+
+    /// Decodes the binary file from a meme jpeg and writes it as executable to dest
+    pub fn decode_bin_to(
+        meme: impl AsRef<Path>,
+        dest: impl AsRef<Path>,
+    ) -> anyhow::Result<PathBuf> {
+        let meme = meme.as_ref();
+        let dest = dest.as_ref();
+        log::debug!("Creating executable `{}`", dest.display());
+        let f = BufWriter::new(
+            OpenOptions::new()
+                .write(true)
+                .create(true)
+                .truncate(true)
+                .mode(0o777)
+                .open(dest)?,
+        );
+        let output = BufWriter::new(f);
+        let input = BufReader::new(File::open(meme)?);
+        log::debug!("Decoding meme binary from `{}`", meme.display());
+        AppMarkerJpegDecoder::new(input, output, AppMarkerConfig::default())?;
+        Ok(dest.to_path_buf())
     }
 }
-// #[derive(Default)]
-// struct Config {
-//     meme: Option<String>
-// }
-//
-// impl Config {
-//
-//     fn set_meme(
-//         &mut self,
-//         meme: syn::Lit,
-//         span: Span,
-//     ) -> Result<(), syn::Error> {
-//         let meme = parse_string(meme, span, "meme")?;
-//
-//         Ok(())
-//     }
-//
-// }
-//
-// fn parse_config( args: &syn::AttributeArgs,) -> Result<Config, syn::Error> {
-//     let mut config = Config::default();
-//
-//     for arg in args {
-//         match arg {
-//             syn::NestedMeta::Meta(syn::Meta::NameValue(namevalue)) => {
-//                 let ident = namevalue.path.get_ident();
-//                 if ident.is_none() {
-//                     let msg = "Must have specified ident";
-//                     return Err(syn::Error::new_spanned(namevalue, msg));
-//                 }
-//                 match ident.unwrap().to_string().to_lowercase().as_str() {
-//                     "meme" => {
-//
-//                         config.set_meme(
-//                             namevalue.lit.clone(),
-//                             syn::spanned::Spanned::span(&namevalue.lit),
-//                         )?;
-//                     }
-//                     name => {
-//                         let msg = format!(
-//                             "Unknown attribute {} is specified; expected one of: `meme`",
-//                             name,
-//                         );
-//                         return Err(syn::Error::new_spanned(namevalue, msg));
-//                     }
-//                 }
-//             }
-//             syn::NestedMeta::Meta(syn::Meta::Path(path)) => {
-//                 let ident = path.get_ident();
-//                 if ident.is_none() {
-//                     let msg = "Must have specified ident";
-//                     return Err(syn::Error::new_spanned(path, msg));
-//                 }
-//                 let name = ident.unwrap().to_string().to_lowercase();
-//                 let msg = match name.as_str() {
-//                     "meme" => {
-//                         format!("The `{}` attribute requires an argument.", name)
-//
-//                     }
-//                     name => {
-//                         format!("Unknown attribute {} is specified; expected one of: `meme`", name)
-//                     }
-//                 };
-//                 return Err(syn::Error::new_spanned(path, msg));
-//             }
-//             other => {
-//                 return Err(syn::Error::new_spanned(
-//                     other,
-//                     "Unknown attribute inside the macro",
-//                 ));
-//             }
-//         }
-//     }
-//
-//     Ok(config)
-// }
-//
-// fn parse_string(lit: syn::Lit, span: Span, field: &str) -> Result<String, syn::Error> {
-//     match lit {
-//         syn::Lit::Verbatim(lit) => Ok(lit.to_string()),
-//         syn::Lit::Str(lit) => Ok(lit.value()),
-//         _ => Err(syn::Error::new(
-//             span,
-//             format!("Failed to parse value of lit `{}` as string.", field),
-//         )),
-//     }
-// }
-//
-// pub(crate) fn main(args: TokenStream, item: TokenStream) -> TokenStream {
-//     let input = syn::parse_macro_input!(item as syn::ItemFn);
-//     let args = syn::parse_macro_input!(args as syn::AttributeArgs);
-//
-//     if input.sig.ident == "main" && !input.sig.inputs.is_empty() {
-//         let msg = "the main function cannot accept arguments";
-//         return syn::Error::new_spanned(&input.sig.ident, msg)
-//             .to_compile_error()
-//             .into();
-//     }
-//
-//
-//     TokenStream::new()
-// }
