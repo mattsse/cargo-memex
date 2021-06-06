@@ -1,5 +1,5 @@
 [package]
-name = "memex"
+name = "cargo-memex"
 version = "0.1.0"
 authors = ["Matthias Seitz <matthias.seitz@outlook.de>"]
 edition = "2018"
