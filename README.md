@@ -56,7 +56,7 @@ Build then execute in one step
 
 ## Roadmap
 
-To achieve feature parity with `cargo` support for publishing memes will be required. Unfortunately crates.io does not support publishing crates as memex memes yet. So in the meantime, another solution needs to be developed.
+Support for publishing memes will be required soon.
 
 The recent NFT frenzy has shown that there is a high demand for NFT based solutions, and that especially memes can be very [lucrative](https://www.nytimes.com/2021/04/29/arts/disaster-girl-meme-nft.html).
 Hence, solutions for cargo-memex are currently being investigated in order to tap this growing market.
