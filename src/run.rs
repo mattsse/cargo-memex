@@ -13,6 +13,6 @@ pub struct RunCommand {
 impl RunCommand {
     pub fn run(&self) -> anyhow::Result<()> {
         let output = self.build.run()?;
-        Ok(ExecCommand::new(output.meme_path).run()?)
+        ExecCommand::new(output.meme_path).run()
     }
 }

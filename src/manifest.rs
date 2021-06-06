@@ -20,13 +20,12 @@ impl Manifest {
     }
 
     pub fn name(&self) -> anyhow::Result<&str> {
-        Ok(self
-            .cargo_toml
+        self.cargo_toml
             .get("package")
             .context("package not found in toml")?
             .get("name")
             .context("package.name field not found in toml")?
             .as_str()
-            .context("package.name field must be a string")?)
+            .context("package.name field must be a string")
     }
 }

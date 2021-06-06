@@ -71,9 +71,7 @@ impl<R: Read, W: Write> AppMarkerJpegDecoder<R, W> {
     pub fn new(r: R, w: W, config: AppMarkerConfig) -> ImageResult<AppMarkerJpegDecoder<R, W>> {
         let mut decoder = self::Decoder::new(r, w, config);
 
-        decoder
-            .read_info()
-            .map_err(|err| jpeg_error_to_image_error(err))?;
+        decoder.read_info().map_err(jpeg_error_to_image_error)?;
         let mut metadata = decoder.info().ok_or_else(|| {
             ImageError::Decoding(DecodingError::from_format_hint(ImageFormat::Jpeg.into()))
         })?;
@@ -107,7 +105,7 @@ impl<R: Read, W: Write> AppMarkerJpegDecoder<R, W> {
         let result = self
             .decoder
             .scale(requested_width, requested_height)
-            .map_err(|err| jpeg_error_to_image_error(err))?;
+            .map_err(jpeg_error_to_image_error)?;
 
         self.metadata.width = result.0;
         self.metadata.height = result.1;
@@ -147,10 +145,7 @@ impl<'a, R: 'a + Read, W: Write> ImageDecoder<'a> for AppMarkerJpegDecoder<R, W>
     }
 
     fn into_reader(mut self) -> ImageResult<Self::Reader> {
-        let mut data = self
-            .decoder
-            .decode()
-            .map_err(|err| jpeg_error_to_image_error(err))?;
+        let mut data = self.decoder.decode().map_err(jpeg_error_to_image_error)?;
         data = match self.decoder.info().unwrap().pixel_format {
             self::PixelFormat::CMYK32 => cmyk_to_rgb(&data),
             _ => data,
@@ -162,10 +157,7 @@ impl<'a, R: 'a + Read, W: Write> ImageDecoder<'a> for AppMarkerJpegDecoder<R, W>
     fn read_image(mut self, buf: &mut [u8]) -> ImageResult<()> {
         assert_eq!(u64::try_from(buf.len()), Ok(self.total_bytes()));
 
-        let mut data = self
-            .decoder
-            .decode()
-            .map_err(|err| jpeg_error_to_image_error(err))?;
+        let mut data = self.decoder.decode().map_err(jpeg_error_to_image_error)?;
         data = match self.decoder.info().unwrap().pixel_format {
             self::PixelFormat::CMYK32 => cmyk_to_rgb(&data),
             _ => data,
