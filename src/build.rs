@@ -29,16 +29,34 @@ pub struct BuildCommand {
     /// Build the meme in release mode, with optimizations
     #[structopt(long)]
     release: bool,
+
+    /// Fetch a random meme from this subreddit
+    #[structopt(long)]
+    subreddit: Option<String>,
 }
 
 impl BuildCommand {
     /// execute the build command
     pub fn run(&self) -> anyhow::Result<BuildOutput> {
-        let meme = self
-            .meme
-            .clone()
-            .unwrap_or_else(|| if self.release { "release" } else { "debug" }.to_string());
-        let meme = Meme::new(&meme)?;
+        let meme = if let Some(ref subreddit) = self.subreddit {
+            Meme::fetch_random_meme(subreddit)?
+                .context(format!("No jpeg meme found on subreddit {}", subreddit))?
+        } else {
+            if let Some(ref meme) = self.meme {
+                Meme::new(meme)?
+            } else {
+                if let Ok(Some(meme)) = Meme::fetch_random_meme("rustjerk") {
+                    meme
+                } else {
+                    if self.release {
+                        Meme::new("release")?
+                    } else {
+                        Meme::new("debug")?
+                    }
+                }
+            }
+        };
+
         let cargo = std::env::var("CARGO").unwrap_or_else(|_| "cargo".to_string());
         let mut cmd = Command::new(cargo);
         cmd.arg("build");

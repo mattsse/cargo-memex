@@ -1,12 +1,15 @@
-use crate::jpeg::decoder::AppMarkerJpegDecoder;
-use crate::jpeg::encoder::AppMarkerJpegEncoder;
-use crate::jpeg::AppMarkerConfig;
-use image::codecs::jpeg::JpegDecoder;
-use image::{DynamicImage, ImageDecoder};
 use std::fs::{File, OpenOptions};
 use std::io::{BufReader, BufWriter, Cursor};
 use std::os::unix::prelude::OpenOptionsExt;
 use std::path::{Path, PathBuf};
+
+use anyhow::Context;
+use image::codecs::jpeg::JpegDecoder;
+use image::{DynamicImage, ImageDecoder};
+
+use crate::jpeg::decoder::AppMarkerJpegDecoder;
+use crate::jpeg::encoder::AppMarkerJpegEncoder;
+use crate::jpeg::AppMarkerConfig;
 
 pub static TRADE_OFFER: &[u8] = include_bytes!("../resources/trade-offer.jpg");
 
@@ -43,6 +46,28 @@ impl Meme {
             }
         };
         Ok(Self { content })
+    }
+
+    /// Fetches a random meme from a subreddit using https://github.com/D3vd/Meme_Api
+    pub fn fetch_random_meme(subreddit: impl AsRef<str>) -> anyhow::Result<Option<Self>> {
+        let url = format!(
+            "https://meme-api.herokuapp.com/gimme/{}/50",
+            subreddit.as_ref()
+        );
+        let resp = reqwest::blocking::get(url)?.json::<serde_json::Value>()?;
+        if let Some(meme) = resp["memes"]
+            .as_array()
+            .context("No memes in response")?
+            .iter()
+            .filter_map(|meme| meme["url"].as_str())
+            .find(|url| url.ends_with(".jpg") || url.ends_with(".jpeg"))
+        {
+            Ok(Some(Self {
+                content: reqwest::blocking::get(meme)?.bytes()?.to_vec(),
+            }))
+        } else {
+            Ok(None)
+        }
     }
 
     /// Puts the bin file into the meme and write to dest
