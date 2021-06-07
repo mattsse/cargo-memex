@@ -1,5 +1,6 @@
 use std::fs::{File, OpenOptions};
 use std::io::{BufReader, BufWriter, Cursor};
+#[cfg(unix)]
 use std::os::unix::prelude::OpenOptionsExt;
 use std::path::{Path, PathBuf};
 
@@ -105,14 +106,25 @@ impl Meme {
         let meme = meme.as_ref();
         let dest = dest.as_ref();
         log::debug!("Creating executable `{}`", dest.display());
-        let f = BufWriter::new(
-            OpenOptions::new()
-                .write(true)
-                .create(true)
-                .truncate(true)
-                .mode(0o777)
-                .open(dest)?,
-        );
+        let f = BufWriter::new({
+            #[cfg(unix)]
+            {
+                OpenOptions::new()
+                    .write(true)
+                    .create(true)
+                    .truncate(true)
+                    .mode(0o777)
+                    .open(dest)?
+            }
+            #[cfg(windows)]
+            {
+                OpenOptions::new()
+                    .write(true)
+                    .create(true)
+                    .truncate(true)
+                    .open(dest)?
+            }
+        });
         let output = BufWriter::new(f);
         let input = BufReader::new(File::open(meme)?);
         log::debug!("Decoding meme binary from `{}`", meme.display());
