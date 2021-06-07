@@ -81,7 +81,6 @@ Ideally, the `cargo publish` subcommand should be extended by an `--nft` option,
 
 ## Known Limitations
 
-* only works on unix
 * only jpeg supported at this point
 
 Licensed under either of these:
