@@ -22,9 +22,13 @@ Also, normal rust executables cannot be easily posted on imageboards like tumble
 
 Another limitation of rust binaries is, that `debug` and `release` executables are visually indistinguishable.
 
-`cargo-memex` fixes this problem by compiling the two different targets by default into the corresponding segment of:
+`cargo-memex` fixes this problem by fetching a random meme from [r/rustjerk](https://www.reddit.com/r/rustjerk/) using [D3vd/Meme_Api](https://github.com/D3vd/Meme_Api) each time.
+
+If no meme could be found it falls back to the corresponding segment of:
 
 ![](./resources/hank.jpg)
+
+You can also request a random meme from any subreddit with the `--subreddit "<subreddit>"` option.
 
 The same problem exists for different release versions which visually always look completely identical. With `cargo-memex` you can compile each new release into a different meme to highlight the differences. This makes support much easier since everyone can directly see which version is installed.
 
@@ -43,7 +47,7 @@ Compile your current project into the meme above, for other built in memes see [
 
 ##### `cargo memex build tradeoffer`
 
-Compile your current project into happy hank
+Compile your current project in release mode with a random meme from [r/rustjerk](https://www.reddit.com/r/rustjerk/)
 
 ##### `cargo memex build --release`
 
@@ -54,6 +58,10 @@ Compile with local meme
 Use a jpeg meme on the web
 
 ##### `cargo memex build "https://meme.jpg"`
+
+Use a random jpeg meme from a subreddit
+
+##### `cargo memex build --subreddit dankmemes`
 
 To execute a memex executable meme
 
