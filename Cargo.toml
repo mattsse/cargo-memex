@@ -1,6 +1,6 @@
 [package]
 name = "cargo-memex"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Matthias Seitz <matthias.seitz@outlook.de>"]
 edition = "2018"
 description = "Compile and execute rust code as memes"
